@@ -1,32 +1,53 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { stat } from 'fs';
+import { Module } from 'module';
+import { App, ButtonComponent, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 
 // Remember to rename these classes and interfaces!
 
-interface MyPluginSettings {
+interface MrDNAPluginSettings {
 	mySetting: string;
 }
 
-const DEFAULT_SETTINGS: MyPluginSettings = {
+const DEFAULT_SETTINGS: MrDNAPluginSettings = {
 	mySetting: 'default'
 }
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+export default class MrDNAPlugin extends Plugin {
+	settings: MrDNAPluginSettings;
+
+	onUserEnable(): void {
+		new Notice('MrDNA Plugin Enabled! (User Enable)');
+	}
 
 	async onload() {
 		await this.loadSettings();
 
+		// Display Notice 
+		new Notice('MrDNA Plugin Loaded!');
+
 		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
+		const ribbonIconEl = this.addRibbonIcon('dice', 'Notice Push', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
+			let randomNumber = Math.floor(Math.random() * 100) + 1;
+			let message = `Notice Push: Random Number is ${randomNumber}`;
+			new Notice(message);
+
+
+			this.app.workspace.trigger('mrDNA:notice-push', message);
+			this.app.workspace.rightSplit;
+			new Notice(`Current File Path: ${this.app.workspace.getActiveFile()?.path}`);
 		});
-		// Perform additional things with the ribbon
-		ribbonIconEl.addClass('my-plugin-ribbon-class');
+
+		// Adding CSS Styling to the ribbon icon if we want
+		//ribbonIconEl.addClass('my-plugin-ribbon-class');
 
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
 		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText('Status Bar Text');
+		statusBarItemEl.setText('Vibing');
+		statusBarItemEl.onClickEvent((evt: MouseEvent) => {
+			new Notice('Status Bar Clicked!');
+			new StatusBarStatus(this.app, statusBarItemEl).open();
+		});
 
 		// This adds a simple command that can be triggered anywhere
 		this.addCommand({
@@ -97,26 +118,87 @@ class SampleModal extends Modal {
 	}
 
 	onOpen() {
-		const {contentEl} = this;
+		const { contentEl } = this;
 		contentEl.setText('Woah!');
 	}
 
 	onClose() {
-		const {contentEl} = this;
+		const { contentEl } = this;
+		contentEl.empty();
+	}
+}
+
+class StatusBarStatus extends Modal {
+	StatusBarItemEl: HTMLElement;
+
+	constructor(app: App, statusBarItemEl: HTMLElement) {
+		super(app);
+		this.StatusBarItemEl = statusBarItemEl;
+	}
+
+	onOpen() {
+		const { contentEl } = this;
+
+		contentEl.style.display = 'flex';
+		contentEl.style.flexDirection = 'column';
+		contentEl.style.gap = '10px';
+
+		contentEl.setText('Status Bar Clicked!');
+	
+
+		let textInput = contentEl.createEl('input');
+		textInput.type = 'text';
+		textInput.placeholder = 'Enter some text...';
+
+		textInput.onchange = () => {
+			new Notice(`You entered: ${textInput.value}`);
+		};
+
+		let text1 = contentEl.createEl
+
+
+		let statusDiv = contentEl.createDiv();
+
+		statusDiv.style.display = 'flex';
+		statusDiv.style.justifyContent = 'space-between';
+		statusDiv.style.alignItems = 'center';
+		statusDiv.style.flexDirection = 'row';
+
+		statusDiv.createEl("p", { text: "Status Bar Status" });
+		statusDiv.createEl("p", { text: "Click the button to close" });
+
+		let button = contentEl.createEl('button');
+
+		button.setText('Close');
+		button.onclick = () => {
+			new Notice('Status Bar Status Closed!');
+
+			this.StatusBarItemEl.setText(`Vibing : ${textInput.value}`);
+
+
+			
+
+
+			this.close();
+		};
+	}
+
+	onClose() {
+		const { contentEl } = this;
 		contentEl.empty();
 	}
 }
 
 class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+	plugin: MrDNAPlugin;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: MrDNAPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
 
 	display(): void {
-		const {containerEl} = this;
+		const { containerEl } = this;
 
 		containerEl.empty();
 
