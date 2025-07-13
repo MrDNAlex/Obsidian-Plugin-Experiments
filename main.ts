@@ -154,9 +154,6 @@ class StatusBarStatus extends Modal {
 			new Notice(`You entered: ${textInput.value}`);
 		};
 
-		let text1 = contentEl.createEl
-
-
 		let statusDiv = contentEl.createDiv();
 
 		statusDiv.style.display = 'flex';
@@ -175,9 +172,7 @@ class StatusBarStatus extends Modal {
 
 			this.StatusBarItemEl.setText(`Vibing : ${textInput.value}`);
 
-
-			
-
+			new SampleModal(this.app).open();
 
 			this.close();
 		};
